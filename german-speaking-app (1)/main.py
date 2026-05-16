@@ -10,5 +10,5 @@ if __name__ == "__main__":
         "main:app",
         host=settings.host,
         port=settings.port,
-        reload=True,
+        reload=False,  # Must be False for Vercel
     )
