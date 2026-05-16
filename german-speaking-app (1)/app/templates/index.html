@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI-powered German speaking practice for beginners. Get a random topic, speak for one minute, then see helpful A2-level German support." />
+  <title>Sprich Mal! — German Speaking Practice</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗣️</text></svg>" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="logo">
+      <span class="logo-flag">🇩🇪</span>
+      <span class="logo-word">Sprich Mal!</span>
+      <span class="logo-tagline">German Speaking Practice</span>
+    </div>
+    <div class="header-actions">
+      <span class="badge">A1 – A2</span>
+      <button class="theme-btn" id="theme-btn" aria-label="Toggle dark mode" title="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <!-- ── Main ── -->
+  <main>
+
+    <!-- Intro -->
+    <section class="intro" aria-label="App introduction">
+      <h1>Ready to <em>speak</em>?</h1>
+      <p>Get a random topic, take 5 seconds to prepare, then speak in German for one minute. Your voice is recorded so you can replay it afterwards.</p>
+    </section>
+
+    <!-- Generate button -->
+    <div class="generate-section">
+      <button class="btn-generate" id="btn-generate" aria-label="Generate a random speaking topic">
+        <div class="spinner" role="status" aria-label="Loading topic"></div>
+        <span class="btn-icon" aria-hidden="true">🎲</span>
+        <span class="btn-text">Give me a topic</span>
+      </button>
+    </div>
+
+    <!-- Topic card -->
+    <article class="card topic-card" id="topic-card" aria-live="polite" aria-atomic="true">
+      <div class="topic-card-inner">
+        <p class="topic-eyebrow">Your topic</p>
+        <h2 class="topic-title" id="topic-title"></h2>
+        <div class="burst" id="burst" aria-hidden="true"></div>
+        <p class="topic-hint" id="topic-hint"></p>
+      </div>
+    </article>
+
+    <!-- Timer card -->
+    <section class="card timer-card" id="timer-card" aria-live="polite" aria-label="Countdown timer">
+      <p class="timer-phase-label" id="timer-phase">Phase: <span>Prepare</span></p>
+
+      <div class="timer-ring-wrap" role="timer" aria-label="Time remaining">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="timer-track"    cx="60" cy="60" r="54" />
+          <circle class="timer-progress" cx="60" cy="60" r="54" id="timer-progress"
+                  stroke-dasharray="339.3" stroke-dashoffset="0" />
+        </svg>
+        <div class="timer-digits">
+          <span class="timer-number" id="timer-number">5</span>
+          <span class="timer-unit"   id="timer-unit">sec</span>
+        </div>
+      </div>
+
+      <!-- Mic status indicator — shown during speaking phase -->
+      <div class="mic-status" id="mic-status" aria-live="polite">
+        <span class="mic-dot" id="mic-dot" aria-hidden="true"></span>
+        <span class="mic-label" id="mic-label"></span>
+      </div>
+
+      <p class="timer-message" id="timer-msg">Get your thoughts ready…</p>
+    </section>
+
+    <!-- ── Recording replay card ── -->
+    <section class="card recording-card" id="recording-card" aria-label="Your recording">
+      <div class="recording-header">
+        <span class="recording-icon" aria-hidden="true">🎙️</span>
+        <div>
+          <p class="recording-title">Your Recording</p>
+          <p class="recording-sub">Listen back and compare with the examples below</p>
+        </div>
+      </div>
+
+      <div class="recording-player">
+        <!-- Waveform visualiser (canvas drawn by JS) -->
+        <canvas id="waveform-canvas" class="waveform-canvas" aria-hidden="true" height="56"></canvas>
+
+        <!-- Controls row -->
+        <div class="player-controls">
+          <button class="btn-play" id="btn-play" aria-label="Play recording">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+              <path id="play-icon-path" d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+
+          <div class="player-scrubber-wrap">
+            <input
+              type="range"
+              id="player-scrubber"
+              class="player-scrubber"
+              min="0" max="100" value="0" step="0.1"
+              aria-label="Playback position"
+            />
+            <div class="player-time">
+              <span id="player-current">0:00</span>
+              <span id="player-duration">0:00</span>
+            </div>
+          </div>
+
+          <a class="btn-download" id="btn-download" download="sprich-mal-recording.webm"
+             aria-label="Download recording" title="Download recording">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Permission denied fallback -->
+      <p class="recording-denied" id="recording-denied" hidden>
+        🎤 Microphone access was denied. Allow microphone permission and try again to enable recording.
+      </p>
+    </section>
+
+    <!-- German help panel -->
+    <section class="help-panel" id="help-panel" aria-label="German language support">
+      <div class="help-panel-header">
+        <span class="help-icon" aria-hidden="true">📖</span>
+        <h2>A2 German Support</h2>
+      </div>
+      <div class="help-sections">
+
+        <div class="help-section">
+          <p class="help-section-title">Summary</p>
+          <div id="help-summary"></div>
+        </div>
+
+        <div class="help-section">
+          <p class="help-section-title">Vocabulary</p>
+          <div class="vocab-grid" id="help-vocab"></div>
+        </div>
+
+        <div class="help-section">
+          <p class="help-section-title">Sentence starters</p>
+          <div id="help-ideas"></div>
+        </div>
+
+        <div class="help-section">
+          <p class="help-section-title">Example sentences</p>
+          <div class="example-list" id="help-examples"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Reset -->
+    <div class="reset-section" id="reset-section">
+      <button class="btn-reset" id="btn-reset">
+        <span aria-hidden="true">↺</span> Try another topic
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>Powered by Groq AI &nbsp;·&nbsp; Keep practicing — every minute counts 🌱</p>
+  </footer>
+
+</div>
+
+<!-- Error toast -->
+<div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
